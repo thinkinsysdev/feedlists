@@ -107,25 +107,38 @@ Template.lists.events(okCancelEvents(
   '#new-list',
   {
     ok: function (text, evt) {
-       Meteor.call('getFeedName', text, function(err, result) {
-        if (typeof console !== 'undefined')
-        {
-          console.log(result);
+      evt.preventDefault();
+      Meteor.call('getFeed', text, function(err, result) {
+       if(result)
+         Router.setList(result);
         
+      });
+   /*   Meteor.call('doesFeedExist', text, function(err, result) {
+        console.log('Got feed with id: ' + result);
+        Router.setList(result);
+      if(!result)
+      {
+      
+      
+       Meteor.call('getFeedName', text, function(err, result) {
+         console.log('Result from getFeedName : ' + result);
+          Router.setList(result);             
+          
           if(!err)
           {
-            Meteor.call('getArticles', text, result, function(err, result) {
+            Meteor.call('getArticles', text, result, function(err, res) {
             
              if(err) throw err;    
               
             });
           } 
-           Router.setList(result);    
-        } 
+              
+        
     
       });
-      
-      
+      }
+      });
+     */
        evt.target.value = "";
   //    var id = Lists.insert({name: text});
     }
@@ -194,7 +207,7 @@ Template.todos.todos = function () {
   if (tag_filter)
     sel.tags = tag_filter;
 
-  return Todos.find(sel, {sort: {timestamp: 1}});
+  return Todos.find(sel, {sort: {timestamp: -1}});
 };
 
 Template.todo_item.tag_objs = function () {

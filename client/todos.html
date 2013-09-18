@@ -6,6 +6,9 @@
   <div id="top-tag-filter">
     {{> tag_filter}}
   </div>
+  <div id="errors">
+    {{> meteorErrors}}
+  </div>
 
   <div id="main-pane">
     {{> todos}}
@@ -17,7 +20,7 @@
 </body>
 
 <template name="lists">
-  <h3>Todo Lists</h3>
+  <h3>Your Feeds</h3>
   {{#if loading}}
     <div id="lists">Loading...</div>
   {{else}}
@@ -40,6 +43,7 @@
     </div>
     <div id="createList">
       <input type="text" id="new-list" placeholder="New list" />
+      {{> meteorErrors}}
     </div>
   {{/if}}
 </template>

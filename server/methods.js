@@ -6,45 +6,69 @@ if (Meteor.isServer) {
 
 Meteor.methods({
   getFeed: function(text) {
-    getFeedName(text, function(err,result) {
-      
-    });
+    var listid = Meteor.call('doesFeedExist',text);
+    if(listid)
+    {
+      console.log('Old List id found: ' + listid);
+     return (listid);
+    }
+    else
+    {
+      var newlistid = Meteor.call('getFeedName', text);
+      console.log('New list created: ' + newlistid);
+      if(newlistid)
+      {
+          var articles= Meteor.call('getArticles',text, newlistid);
+          return(newlistid);
+       }
+    }    
+  },
+  doesFeedExist: function(url) {
+    var feedwithsameurl = Lists.findOne({url:url});
+    if(feedwithsameurl)
+    {
+      return feedwithsameurl._id;
+    }
+    else
+    {
+       return false; 
+    }
   },
   getFeedName: function(url) {
-     var fut = new Future();
+      var fut = new Future();
      var parser = Meteor.require('ortoo-feedparser');
+    var feedwithsamelink = Lists.findOne({url:url});
+    //console.log('Found Feed: ' + feedwithsamelink);
+ 
+    console.log('In the feed name function');
+   
     console.log(url);
-      /* This should work for any async method
-      setTimeout(function() {
-      
-        // Return the results
-        fut['return'](url + " (delayed for 3 seconds)");
-
-      }, 15 * 1000);
-        */
+       var feedid;
+       var listid;
     parser.parseUrl(url)
     .on('meta',  Meteor.bindEnvironment(function(meta) {
         
         console.log(meta.title);
-       var feedid = Feeds.insert({url: url, title: meta.title, link: meta.link, date: meta.date, categories: meta.categories}); 
-       
-        var listid = Lists.insert({name: meta.title});
-        
+       feedid =   Feeds.insert({url: url, title: meta.title, link: meta.link, date: meta.date, categories: meta.categories});   
+        listid = Lists.insert({url: url, name: meta.title});
+      
+        console.log(listid);        
         fut['return'](listid);
         }, function(e) {throw e;}
         ))
-    .on('error', function(err) {
+    .on('error', Meteor.bindEnvironment(function(err) {
       console.log('error returned: ' + err);
-      fut['return'] ('error returned ' + err);
-    });
-    
+      throw ('Error ' + err);
+    }, function(e) {throw e;}));
+     
+     
     
       // Wait for async to finish before returning
       // the result
-      return fut.wait();
+       return fut.wait();
       
     
-    
+   
     },
   getArticles: function(url, list_id) {
         var fparser = Meteor.require('ortoo-feedparser');

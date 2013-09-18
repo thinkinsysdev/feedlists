@@ -3,6 +3,25 @@ var  url = Npm.require('url');
 var parser = Meteor.require('ortoo-feedparser');
 
 Meteor.startup(function () {
+  
+  var urls = [	'http://feeds.reuters.com/reuters/businessNews',
+	'http://feeds.reuters.com/ReutersBusinessTravel',
+	'http://feeds.reuters.com/news/artsculture',
+	'http://feeds.reuters.com/reuters/topNews',
+	'http://feeds.cnevids.com/mrss/wired.xml',
+	'http://rss.cnn.com/rss/cnn_us.rss'];
+
+Feeds.remove({});
+urls.forEach(function(url)
+{
+  parser.parseUrl(url)
+   .on('meta', Meteor.bindEnvironment(function(meta) {
+        
+        console.log(meta.title);
+        Feeds.insert({url: url, title: meta.title, link: meta.link, date: meta.date, categories: meta.categories});   
+   }, function(e) {throw e;}
+   ));
+});
   Posts.remove({});
   Lists.remove({});
   Todos.remove({});
@@ -11,7 +30,7 @@ Meteor.startup(function () {
   {
     feeds.forEach(function(feed) {
       console.log(feed.title);
-      var list_id = Lists.insert({name: feed.title});
+      var list_id = Lists.insert({name: feed.title, url: feed.url});
    //   console.log(list_id);
       var count = 0;
       parser.parseUrl(feed.url)
