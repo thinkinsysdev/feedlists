@@ -12,3 +12,5 @@ preserve-inputs
 insecure
 npm
 errors
+bootstrap
+handlebar-helpers

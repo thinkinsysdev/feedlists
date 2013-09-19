@@ -2,7 +2,18 @@ var fiber = Npm.require('fibers');
 var Future = Npm.require('fibers/future');
 
 if (Meteor.isServer) {
-  
+  Meteor.startup(function() {
+    Posts.remove({});
+    Todos.remove({});
+    var refreshfeeds = Meteor.call('refreshFeeds');
+    if (Feeds.find().count() > 0)
+    {
+      var intHandle = Meteor.setInterval(function() 
+                                         {
+                                          Meteor.call('refreshFeeds', function(err,result) { if(err) throw err;});
+                                         }, 15 * 60000);
+    }
+  });
 
 Meteor.methods({
   getFeed: function(text) {
@@ -23,6 +34,18 @@ Meteor.methods({
        }
     }    
   },
+  refreshFeeds: function() {
+    var lists = Lists.find({});
+    console.log('In the refresh feeds section');
+  if ( lists.count() > 0)
+  {
+    lists.forEach(function(feed) {
+      console.log(feed.name);
+     var articles = Meteor.call('getArticles', feed.url, feed._id);
+    });
+  }
+      
+  },  
   doesFeedExist: function(url) {
     var feedwithsameurl = Lists.findOne({url:url});
     if(feedwithsameurl)
@@ -75,6 +98,10 @@ Meteor.methods({
         fparser.parseUrl(url)
         .on('error', function(e) {throw e; })
         .on('article', Meteor.bindEnvironment(function(article) {
+          
+          var samepost = Todos.findOne({text: article.title, list_id: list_id, link:article.link});
+          if(!samepost)
+          {
           Posts.insert(article, function(err, id)
                  {
                    if(!err)
@@ -88,11 +115,12 @@ Meteor.methods({
          Todos.insert({list_id: list_id, 
                        text: article.title,
                        timestamp: article.date,
-                       tags: ['US News', 'World News'],
+                       tags: article.categories,
                        link: article.link,
                        summary: article.summary
                       });
           
+        }
         }, function(e) {throw e; }));
   },
   insertFeedName: function(feedmeta) {

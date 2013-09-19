@@ -6,11 +6,12 @@
   <div id="top-tag-filter">
     {{> tag_filter}}
   </div>
-  <div id="errors">
-    {{> meteorErrors}}
-  </div>
+  
 
   <div id="main-pane">
+    <div id="errors">
+    {{> meteorErrors}}
+    </div>
     {{> todos}}
   </div>
 
@@ -26,14 +27,14 @@
   {{else}}
     <div id="lists">
       {{#each lists}}
-        <div class="list {{selected}}">
+        <div class="nav nav-list list {{selected}}">
           {{#if editing}}
             <div class="edit">
-              <input class="list-name-input" id="list-name-input" type="text" value="{{name}}" />
+              <input class="active list-name-input" id="list-name-input" type="text" value="{{name}}" />
             </div>
           {{else}}
             <div class="display">
-              <a class="list-name {{name_class}}" href="/{{_id}}">
+              <a class="active list-name {{name_class}}" href="/{{_id}}">
                 {{name}}
               </a>
             </div>
@@ -50,14 +51,11 @@
 
 <template name="todos">
   {{#if any_list_selected}}
-    <div id="items-view">
+    <div id="items-view" class="row-fluid">
       {{#if loading}}
         Loading...
       {{else}}
-        <div id="new-todo-box">
-          <input type="text" id="new-todo" placeholder="New item" />
-        </div>
-        <ul id="item-list">
+        <ul id="item-list" >
           {{#each todos}}
             {{> todo_item}}
           {{/each}}
@@ -79,10 +77,10 @@
         <input class="check" name="markdone" type="checkbox" {{{done_checkbox}}} />
         <div class="todo-text">
           <a href={{link}} target="_blank">  {{text}} </a>
-                  
+          <div class="todo-timestamp"> {{timestamp}} </div>       
         </div>
         <div class="todo-summary">
-          {{summary}}
+          {{description}}
         </div>
       </div>
     {{/if}}
